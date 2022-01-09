@@ -2,6 +2,7 @@
 
 #include <array>
 #include <bitset>
+#include <cassert>
 
 #if !defined( BITPACKER_USE_STD_BIT )
 #    define BITPACKER_USE_STD_BIT __has_include( <bit> ) && __cplusplus >= 202002L
@@ -53,8 +54,7 @@ public:
 
     constexpr bit_ostream& operator<<( const bool value )
     {
-        // TODO: add constexpr friendly check for this case
-        //assert( m_offset < m_data.size() );
+        assert( m_offset < m_data.size() );
         m_data[m_offset++] = value;
         return *this;
     }
@@ -79,8 +79,7 @@ public:
 
     constexpr bit_istream& operator>>( bool& value )
     {
-        // TODO: add constexpr friendly check for this case
-        //assert( m_offset < m_data.size() );
+        assert( m_offset < m_data.size() );
         value = m_data[m_offset++];
         return *this;
     }

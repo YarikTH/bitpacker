@@ -1,5 +1,8 @@
 #pragma once
 
+#include <array>
+#include <bitset>
+
 #if !defined( BITPACKER_USE_STD_BIT )
 #    define BITPACKER_USE_STD_BIT __has_include( <bit> ) && __cplusplus >= 202002L
 #endif
@@ -40,6 +43,58 @@ template <class V, std::enable_if_t<std::is_unsigned_v<V>, int> = 0>
 
 #endif
 
+template <class ContainerT>
+class bit_ostream
+{
+public:
+    constexpr explicit bit_ostream( ContainerT& data )
+        : m_data( data )
+    {}
+
+    constexpr bit_ostream& operator<<( const bool value )
+    {
+        // TODO: add constexpr friendly check for this case
+        //assert( m_offset < m_data.size() );
+        m_data[m_offset++] = value;
+        return *this;
+    }
+
+    [[nodiscard]] constexpr size_t offset() const
+    {
+        return m_offset;
+    }
+
+private:
+    ContainerT& m_data;
+    size_t m_offset = 0;
+};
+
+template <class ContainerT>
+class bit_istream
+{
+public:
+    constexpr explicit bit_istream( ContainerT& data )
+        : m_data( data )
+    {}
+
+    constexpr bit_istream& operator>>( bool& value )
+    {
+        // TODO: add constexpr friendly check for this case
+        //assert( m_offset < m_data.size() );
+        value = m_data[m_offset++];
+        return *this;
+    }
+
+    [[nodiscard]] constexpr size_t offset() const
+    {
+        return m_offset;
+    }
+
+private:
+    ContainerT& m_data;
+    size_t m_offset = 0;
+};
+
 /// Return unsigned difference between two integers
 /// Left hand side value should be greater or equal than right hand side value
 template <typename V, class UnsignedV = typename std::make_unsigned<V>::type>
@@ -62,6 +117,38 @@ template <typename V, class UnsignedV = typename std::make_unsigned<V>::type>
     const auto min_value = std::numeric_limits<V>::min();
     const auto max_value = std::numeric_limits<V>::max();
     return integral_delta( min_value, max_value );
+}
+
+// Pack normalized value in range from 0 to delta
+template <typename V, typename OutputBitStreamT>
+constexpr void pack_normalized_value( OutputBitStreamT& obstream, const V value, const V delta )
+{
+    static_assert( std::is_unsigned_v<V> );
+    auto temp = value;
+    constexpr auto ONE = static_cast<V>( 1 );
+    for( size_t i = 0, ie = bit_width( delta ); i < ie; ++i )
+    {
+        const bool bit = temp & ONE;
+        obstream << bit;
+        temp >>= ONE;
+    }
+}
+
+template <typename V, typename InputBitStreamT>
+constexpr V unpack_normalized_value( InputBitStreamT& ibstream, const V delta )
+{
+    V value{};
+    constexpr auto ONE = static_cast<V>( 1 );
+    for( size_t i = 0, ie = bit_width( delta ); i < ie; ++i )
+    {
+        bool bit;
+        ibstream >> bit;
+        if( bit )
+        {
+            value |= ( ONE << i );
+        }
+    }
+    return value;
 }
 
 } // namespace bitpacker

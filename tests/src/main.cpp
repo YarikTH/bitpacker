@@ -10,7 +10,7 @@ template <typename V>
 constexpr bool check_pack_unpack_normalized( const V value, const V max_value )
 {
     std::array<bool, 32> data{};
-    V value2;
+    V value2{};
 
     {
         auto ostream = bitpacker::bit_ostream( data );

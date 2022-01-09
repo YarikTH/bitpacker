@@ -140,7 +140,7 @@ constexpr V unpack_normalized_value( InputBitStreamT& ibstream, const V delta )
     constexpr auto ONE = static_cast<V>( 1 );
     for( size_t i = 0, ie = bit_width( delta ); i < ie; ++i )
     {
-        bool bit;
+        bool bit{};
         ibstream >> bit;
         if( bit )
         {

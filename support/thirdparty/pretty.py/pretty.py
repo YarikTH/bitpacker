@@ -7,7 +7,7 @@ from enum import Enum
 from typing import List
 from dataclasses import dataclass
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 
 @dataclass
